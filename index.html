@@ -397,6 +397,95 @@
   .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
   .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
 
+  /* 印刷ボタン */
+  .btn-print {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    width: 100%;
+    justify-content: center;
+  }
+  .print-emp-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--surface);
+    margin-bottom: 8px;
+  }
+
+  /* 印刷用スタイル */
+  @media print {
+    body * { visibility: hidden; }
+    #printArea, #printArea * { visibility: visible; }
+    #printArea {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      padding: 20px;
+    }
+  }
+  #printArea {
+    display: none;
+  }
+  .print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #2c5f2e;
+    padding-bottom: 10px;
+  }
+  .print-title { font-size: 20px; font-weight: 700; color: #2c5f2e; }
+  .print-sub { font-size: 13px; color: #666; margin-top: 4px; }
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .print-table th {
+    background: #2c5f2e;
+    color: white;
+    padding: 8px 10px;
+    text-align: center;
+    font-weight: 700;
+  }
+  .print-table td {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+  }
+  .print-table tr:nth-child(even) td { background: #f5f5f5; }
+  .print-total {
+    background: #f0f7f0;
+    border: 2px solid #2c5f2e;
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+  }
+  .print-total-label { font-size: 14px; font-weight: 700; color: #2c5f2e; }
+  .print-total-value { font-size: 22px; font-weight: 700; color: #2c5f2e; }
+  .print-footer {
+    margin-top: 20px;
+    font-size: 11px;
+    color: #999;
+    text-align: right;
+  }
+
   /* Misc */
   .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
   .empty-icon { font-size: 40px; margin-bottom: 8px; }
@@ -579,7 +668,18 @@
         <tbody id="salaryTable"></tbody>
       </table>
     </div>
+    <div class="card">
+      <div class="card-title">🖨️ 勤務明細を印刷</div>
+      <div class="form-group">
+        <label class="form-label">従業員を選択</label>
+        <select class="print-emp-select" id="printEmpSelect"></select>
+      </div>
+      <button class="btn-print" onclick="printReport()">🖨️ この月の明細を印刷する</button>
+    </div>
   </div>
+
+  <!-- 印刷エリア（非表示） -->
+  <div id="printArea"></div>
 
   <!-- 従業員タブ -->
   <div class="section" id="section-employees">
@@ -906,6 +1006,7 @@ function addEmployee() {
   document.getElementById('empWage').value = '';
   renderEmployees();
   updateEmpSelects();
+  updatePrintEmpSelect();
 }
 
 function deleteEmployee(id) {
@@ -914,6 +1015,7 @@ function deleteEmployee(id) {
   saveData();
   renderEmployees();
   updateEmpSelects();
+  updatePrintEmpSelect();
 }
 
 function renderEmployees() {
@@ -1196,12 +1298,101 @@ function renderSalary() {
     </tr>`;
 }
 
+// ====== 印刷機能 ======
+function updatePrintEmpSelect() {
+  const sel = document.getElementById('printEmpSelect');
+  if (!sel) return;
+  sel.innerHTML = employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+}
+
+function printReport() {
+  const empId = parseInt(document.getElementById('printEmpSelect').value);
+  const emp = employees.find(e => e.id === empId);
+  if (!emp) return alert('従業員を選択してください');
+
+  const recs = records
+    .filter(r => r.employeeId === empId && r.date.startsWith(salaryMonth) && r.endTime)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  let totalRaw = 0, totalNet = 0, totalBreak = 0;
+  let rows = '';
+
+  recs.forEach((r, i) => {
+    const h = calcHours(r);
+    totalRaw   += h.raw;
+    totalNet   += h.net;
+    totalBreak += h.break;
+    const d = new Date(r.date);
+    const days = ['日','月','火','水','木','金','土'];
+    const dateLabel = `${r.date}（${days[d.getDay()]}）`;
+    rows += `<tr>
+      <td>${i + 1}</td>
+      <td>${dateLabel}</td>
+      <td>${r.startTime}</td>
+      <td>${r.endTime}</td>
+      <td>${h.break}分</td>
+      <td>${fmtHours(h.net)}</td>
+      <td>¥${Math.round(h.net * emp.wage).toLocaleString()}</td>
+    </tr>`;
+  });
+
+  if (!rows) return alert('この月の記録がありません');
+
+  const totalPay = Math.round(totalNet * emp.wage);
+  const monthLabel = salaryMonth.replace('-', '年') + '月';
+  const printedAt = new Date().toLocaleString('ja-JP');
+
+  document.getElementById('printArea').innerHTML = `
+    <div class="print-header">
+      <div>
+        <div class="print-title">勤務明細書</div>
+        <div class="print-sub">${monthLabel}　${emp.name} 様</div>
+      </div>
+      <div style="text-align:right;font-size:12px;color:#666;">
+        時給：¥${emp.wage.toLocaleString()}<br>
+        出力日：${printedAt}
+      </div>
+    </div>
+    <table class="print-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>日付</th>
+          <th>出勤</th>
+          <th>退勤</th>
+          <th>休憩</th>
+          <th>実働</th>
+          <th>日給</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="font-size:13px;margin-bottom:6px;color:#666;">
+      勤務日数：${recs.length}日　／　総勤務時間：${fmtHours(totalRaw)}　／　休憩合計：${totalBreak}分
+    </div>
+    <div class="print-total">
+      <div class="print-total-label">実働時間合計</div>
+      <div class="print-total-value">${fmtHours(totalNet)}</div>
+    </div>
+    <div class="print-total" style="margin-top:8px;">
+      <div class="print-total-label">💴 当月支給額</div>
+      <div class="print-total-value">¥${totalPay.toLocaleString()}</div>
+    </div>
+    <div class="print-footer">真壁ファーム長野　シフト管理システム</div>
+  `;
+
+  document.getElementById('printArea').style.display = 'block';
+  window.print();
+  document.getElementById('printArea').style.display = 'none';
+}
+
 // ====== 初期化 ======
 window.addEventListener('DOMContentLoaded', () => {
   updateEmpSelects();
   renderEmployees();
   renderTodayStatus();
   updateDefTotal();
+  updatePrintEmpSelect();
 
   // 手動追加フォームの初期値
   document.getElementById('addDate').value = new Date().toISOString().slice(0, 10);
