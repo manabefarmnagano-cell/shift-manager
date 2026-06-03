@@ -1,251 +1,383 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>シフト管理アプリ</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #232738;
-    --border: #2e3348;
-    --accent: #4ade80;
-    --accent2: #22d3ee;
-    --accent3: #f59e0b;
-    --text: #e8eaf0;
-    --muted: #7a7f9a;
-    --danger: #f87171;
+    --primary: #2c5f2e;
+    --primary-light: #4a8c4d;
+    --primary-dark: #1a3d1c;
+    --accent: #f4a027;
+    --accent-light: #f7c06e;
+    --bg: #f5f3ee;
+    --surface: #ffffff;
+    --surface2: #f0ede7;
+    --text: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --border: #d9d3c7;
+    --danger: #c0392b;
+    --danger-light: #fdf0ef;
+    --success: #27ae60;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
     --radius: 12px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    font-size: 14px;
   }
-  header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+
+  /* Header */
+  .app-header {
+    background: var(--primary);
+    color: white;
     padding: 16px 20px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: space-between;
     position: sticky;
     top: 0;
     z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   }
-  .logo {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-  }
-  header h1 { font-size: 16px; font-weight: 700; }
-  header span { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .app-header h1 { font-size: 18px; font-weight: 700; }
+  .app-header .subtitle { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+  .clock { font-size: 22px; font-weight: 300; font-variant-numeric: tabular-nums; }
 
-  nav {
+  /* Nav */
+  .nav-tabs {
     display: flex;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    background: var(--primary-dark);
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  nav button {
+  .nav-tab {
     flex: 1;
+    min-width: 70px;
     padding: 12px 8px;
-    background: none;
     border: none;
-    color: var(--muted);
-    font-family: inherit;
-    font-size: 12px;
+    background: transparent;
+    color: rgba(255,255,255,0.65);
+    font-size: 11px;
     cursor: pointer;
-    border-bottom: 2px solid transparent;
+    text-align: center;
     transition: all 0.2s;
-    white-space: nowrap;
-    min-width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
   }
-  nav button.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
+  .nav-tab .tab-icon { font-size: 18px; }
+  .nav-tab.active { color: white; background: rgba(255,255,255,0.12); border-bottom: 3px solid var(--accent); }
 
-  main { padding: 16px; max-width: 600px; margin: 0 auto; }
-
-  .page { display: none; }
-  .page.active { display: block; }
+  /* Main */
+  .main { padding: 16px; max-width: 600px; margin: 0 auto; }
+  .section { display: none; }
+  .section.active { display: block; }
 
   /* Cards */
   .card {
     background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
     border: 1px solid var(--border);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+
+  /* Clock section */
+  .clock-display {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .clock-big {
+    font-size: 52px;
+    font-weight: 200;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary);
+    letter-spacing: 2px;
+  }
+  .date-display { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+  .punch-select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 15px;
+    background: var(--surface);
+    margin-bottom: 12px;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+  .btn-row { display: flex; gap: 10px; }
+  .btn {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-in { background: var(--success); color: white; }
+  .btn-out { background: var(--danger); color: white; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-sm {
+    padding: 8px 14px;
+    font-size: 13px;
+    border-radius: 8px;
+    flex: none;
+  }
+  .btn-add { background: var(--primary); color: white; width: 100%; margin-top: 8px; padding: 12px; }
+
+  /* Today status */
+  .status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .status-item {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+  .status-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .status-value { font-size: 16px; font-weight: 700; color: var(--primary); }
+
+  /* Form */
+  .form-group { margin-bottom: 12px; }
+  .form-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block; font-weight: 600; }
+  .form-input, .form-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--surface);
+    transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus { outline: none; border-color: var(--primary); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  /* 休憩設定 */
+  .break-section {
+    background: #fff8ed;
+    border: 1.5px solid #f4c97a;
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 10px;
+  }
+  .break-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #c17a00;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .break-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #f0d9a0;
+  }
+  .break-item label {
+    font-size: 12px;
+    color: var(--text-muted);
+    min-width: 70px;
+    font-weight: 600;
+  }
+  .break-item input[type="number"] {
+    width: 70px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    text-align: center;
+  }
+  .break-item span { font-size: 12px; color: var(--text-muted); }
+  .break-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+  .toggle-switch {
+    position: relative;
+    width: 40px;
+    height: 22px;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: #ccc;
+    border-radius: 22px;
+    transition: 0.3s;
+  }
+  .toggle-slider:before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+  .toggle-switch input:checked + .toggle-slider { background: var(--primary); }
+  .toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); }
+  .break-disabled { opacity: 0.4; pointer-events: none; }
+  .break-minutes-display {
+    font-size: 11px;
+    color: #c17a00;
+    background: #fff3d6;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* Records */
+  .record-list { list-style: none; }
+  .record-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .record-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .record-name { font-weight: 700; font-size: 15px; }
+  .record-date { font-size: 12px; color: var(--text-muted); }
+  .record-times { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .record-time { font-size: 13px; }
+  .record-break {
+    font-size: 11px;
+    color: #c17a00;
+    background: #fff3d6;
+    padding: 2px 7px;
+    border-radius: 12px;
+  }
+  .record-hours {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-left: auto;
+  }
+  .record-pay {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: right;
+    margin-top: 4px;
+  }
+  .record-actions { display: flex; gap: 6px; margin-top: 8px; }
+  .btn-edit { background: #e8f0fe; color: #1a56db; font-size: 12px; padding: 5px 10px; border: none; border-radius: 6px; cursor: pointer; }
+  .btn-delete { background: var(--danger-light); color: var(--danger); font-size: 12px; padding: 5px 10px; border: none; border-radius: 6px; cursor: pointer; }
+
+  /* 月別集計 */
+  .month-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .month-nav-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 14px; }
+  .month-title { font-size: 16px; font-weight: 700; color: var(--primary); }
+  .summary-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .summary-table th { background: var(--surface2); padding: 8px 10px; text-align: left; font-weight: 700; color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
+  .summary-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .summary-table tr:last-child td { border-bottom: none; }
+  .total-row td { font-weight: 700; background: #f0f7f0; color: var(--primary); }
+
+  /* 従業員 */
+  .emp-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    background: var(--surface);
+  }
+  .emp-info { }
+  .emp-name { font-weight: 700; font-size: 15px; }
+  .emp-wage { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .emp-actions { display: flex; gap: 6px; }
+
+  /* 休憩デフォルト設定タブ */
+  .break-default-card {
+    background: #fff8ed;
+    border: 1.5px solid #f4c97a;
     border-radius: var(--radius);
     padding: 16px;
     margin-bottom: 12px;
   }
-  .card-title {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    margin-bottom: 12px;
-  }
-
-  /* Inputs */
-  input, select {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: inherit;
+  .break-default-title {
     font-size: 14px;
-    padding: 10px 12px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  input:focus, select:focus { border-color: var(--accent2); }
-  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-  .field { margin-bottom: 12px; }
-
-  /* Buttons */
-  .btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-primary { background: var(--accent); color: #0f1117; }
-  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-  .btn-danger { background: var(--danger); color: #fff; }
-  .btn-sm { padding: 6px 12px; font-size: 11px; }
-  .btn-full { width: 100%; }
-
-  /* Employee list */
-  .emp-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: var(--surface2);
-    border-radius: 8px;
-    margin-bottom: 8px;
-  }
-  .emp-avatar {
-    width: 38px; height: 38px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
     font-weight: 700;
-    font-size: 15px;
-    flex-shrink: 0;
-  }
-  .emp-info { flex: 1; }
-  .emp-name { font-weight: 600; font-size: 14px; }
-  .emp-wage { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); }
-  .emp-actions { display: flex; gap: 6px; }
-
-  /* Attendance */
-  .today-card {
-    background: linear-gradient(135deg, #1a2e1a, #1a2738);
-    border: 1px solid var(--accent);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 16px;
-    text-align: center;
-  }
-  .clock-display {
-    font-family: 'DM Mono', monospace;
-    font-size: 36px;
-    font-weight: 500;
-    color: var(--accent);
-    margin: 8px 0;
-  }
-  .date-display { font-size: 12px; color: var(--muted); }
-
-  .att-row {
+    color: #c17a00;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
+  }
+  .break-default-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 10px;
-    background: var(--surface2);
+    background: white;
     border-radius: 8px;
-    margin-bottom: 6px;
-  }
-  .att-name { flex: 1; font-size: 13px; font-weight: 500; }
-  .att-time { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
-  .status-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--border);
-  }
-  .status-dot.in { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-  .status-dot.out { background: var(--accent2); }
-
-  /* Records */
-  .rec-item {
-    padding: 10px 12px;
-    background: var(--surface2);
-    border-radius: 8px;
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .rec-date { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); width: 55px; flex-shrink: 0; }
-  .rec-name { font-size: 13px; font-weight: 500; flex: 1; }
-  .rec-hours { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent2); }
-  .rec-del { background: none; border: none; color: var(--muted); font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
-  .rec-del:hover { color: var(--danger); background: rgba(248,113,113,0.1); }
-
-  /* Salary */
-  .salary-card {
-    background: var(--surface2);
-    border-radius: 8px;
-    padding: 14px;
     margin-bottom: 8px;
+    border: 1px solid #f0d9a0;
   }
-  .salary-name { font-weight: 600; margin-bottom: 8px; }
-  .salary-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-  .salary-total {
-    display: flex;
-    justify-content: space-between;
-    font-family: 'DM Mono', monospace;
+  .break-default-label { font-size: 13px; font-weight: 600; }
+  .break-default-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .break-default-input-wrap { display: flex; align-items: center; gap: 6px; }
+  .break-default-input {
+    width: 65px;
+    padding: 7px 8px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: center;
     font-weight: 700;
-    color: var(--accent);
-    font-size: 16px;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid var(--border);
   }
-  .month-selector {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    background: var(--surface2);
-    border-radius: 8px;
-    padding: 8px 12px;
-  }
-  .month-selector button {
-    background: none; border: none; color: var(--text); font-size: 18px; cursor: pointer; padding: 4px 8px;
-  }
-  .month-selector span { font-weight: 600; font-size: 14px; }
 
   /* Modal */
   .modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.5);
     z-index: 200;
     align-items: flex-end;
     justify-content: center;
@@ -253,526 +385,828 @@
   .modal-overlay.open { display: flex; }
   .modal {
     background: var(--surface);
-    border-radius: var(--radius) var(--radius) 0 0;
-    padding: 24px 20px 32px;
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px;
     width: 100%;
     max-width: 600px;
-    border-top: 1px solid var(--border);
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
   }
-  .modal h3 { font-size: 15px; margin-bottom: 16px; }
-  .modal-btns { display: flex; gap: 8px; margin-top: 16px; }
-  .modal-btns .btn { flex: 1; }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
 
-  /* Tag/badge */
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 99px;
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
+  /* Misc */
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+  .empty-icon { font-size: 40px; margin-bottom: 8px; }
+  .badge { display: inline-block; background: var(--accent-light); color: #7a4500; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .filter-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .filter-btn { padding: 6px 14px; border: 1.5px solid var(--border); border-radius: 20px; background: white; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .info-box {
+    background: #e8f4fd;
+    border: 1px solid #b3d9f5;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #1a5276;
+    margin-bottom: 12px;
+    line-height: 1.6;
   }
-  .badge-green { background: rgba(74,222,128,0.15); color: var(--accent); }
-  .badge-blue { background: rgba(34,211,238,0.15); color: var(--accent2); }
-
-  .empty { text-align: center; color: var(--muted); padding: 32px 0; font-size: 13px; }
-
-  /* Toast */
-  .toast {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(60px);
-    background: var(--accent);
-    color: #0f1117;
-    font-weight: 600;
-    font-size: 13px;
-    padding: 10px 20px;
-    border-radius: 99px;
-    z-index: 999;
-    transition: transform 0.3s ease;
-    pointer-events: none;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-
-  .section-label {
-    font-size: 11px; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 0.1em;
-    margin-bottom: 8px; margin-top: 16px;
-  }
-
-  .colors { --c1:#4ade80;--c2:#22d3ee;--c3:#f59e0b;--c4:#a78bfa;--c5:#fb7185; }
 </style>
 </head>
 <body>
-<header>
-  <div class="logo">⏱</div>
+
+<div class="app-header">
   <div>
-    <h1>シフト管理</h1>
-    <span>アルバイト勤怠・給与管理</span>
+    <div class="app-header h1" style="font-size:18px;font-weight:700;">⏱ シフト管理</div>
+    <div class="subtitle">アルバイト勤怠・給与管理</div>
   </div>
-</header>
+  <div class="clock" id="headerClock">--:--:--</div>
+</div>
 
-<nav>
-  <button class="active" onclick="showPage('attendance')">📅 出退勤</button>
-  <button onclick="showPage('records')">📋 記録</button>
-  <button onclick="showPage('salary')">💴 給与</button>
-  <button onclick="showPage('employees')">👤 従業員</button>
-</nav>
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="switchTab('punch')" id="tab-punch">
+    <span class="tab-icon">📅</span>出退勤
+  </button>
+  <button class="nav-tab" onclick="switchTab('records')" id="tab-records">
+    <span class="tab-icon">📋</span>記録
+  </button>
+  <button class="nav-tab" onclick="switchTab('salary')" id="tab-salary">
+    <span class="tab-icon">💴</span>給与
+  </button>
+  <button class="nav-tab" onclick="switchTab('employees')" id="tab-employees">
+    <span class="tab-icon">👤</span>従業員
+  </button>
+  <button class="nav-tab" onclick="switchTab('breaks')" id="tab-breaks">
+    <span class="tab-icon">☕</span>休憩
+  </button>
+</div>
 
-<main>
-  <!-- 出退勤ページ -->
-  <div class="page active" id="page-attendance">
-    <div class="today-card">
-      <div class="date-display" id="date-display"></div>
-      <div class="clock-display" id="clock-display">--:--:--</div>
-      <div class="badge badge-green">リアルタイム</div>
+<div class="main">
+
+  <!-- 出退勤タブ -->
+  <div class="section active" id="section-punch">
+    <div class="card">
+      <div class="clock-display">
+        <div class="clock-big" id="bigClock">--:--:--</div>
+        <div class="date-display" id="dateDisplay">読み込み中...</div>
+      </div>
     </div>
-
     <div class="card">
       <div class="card-title">打刻する</div>
-      <div class="field">
-        <label>従業員を選択</label>
-        <select id="att-emp-select">
-          <option value="">-- 選択してください --</option>
-        </select>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-primary" style="flex:1" onclick="clockIn()">🟢 出勤</button>
-        <button class="btn btn-secondary" style="flex:1" onclick="clockOut()">🔴 退勤</button>
-      </div>
-    </div>
-
-    <div class="section-label">本日の状況</div>
-    <div id="today-status"></div>
-  </div>
-
-  <!-- 記録ページ -->
-  <div class="page" id="page-records">
-    <div class="card">
-      <div class="card-title">勤務記録を追加</div>
-      <div class="field">
-        <label>従業員</label>
-        <select id="rec-emp-select"></select>
-      </div>
-      <div class="field">
-        <label>日付</label>
-        <input type="date" id="rec-date">
-      </div>
-      <div style="display:flex;gap:8px;" class="field">
-        <div style="flex:1">
-          <label>出勤時刻</label>
-          <input type="time" id="rec-in">
-        </div>
-        <div style="flex:1">
-          <label>退勤時刻</label>
-          <input type="time" id="rec-out">
-        </div>
-      </div>
-      <button class="btn btn-primary btn-full" onclick="addRecord()">記録を追加</button>
-    </div>
-
-    <div class="section-label">勤務記録一覧</div>
-    <div class="field" style="display:flex;gap:8px;margin-bottom:8px;">
-      <select id="filter-emp" style="flex:1" onchange="renderRecords()">
-        <option value="">全員</option>
+      <select class="punch-select" id="punchEmployee">
+        <option value="">-- 従業員を選択 --</option>
       </select>
-      <input type="month" id="filter-month" style="flex:1" onchange="renderRecords()">
+      <div class="btn-row">
+        <button class="btn btn-in" onclick="punchIn()">🟢 出勤</button>
+        <button class="btn btn-out" onclick="punchOut()">🔴 退勤</button>
+      </div>
     </div>
-    <div id="records-list"></div>
-  </div>
-
-  <!-- 給与ページ -->
-  <div class="page" id="page-salary">
-    <div class="month-selector">
-      <button onclick="changeMonth(-1)">‹</button>
-      <span id="salary-month-label"></span>
-      <button onclick="changeMonth(1)">›</button>
-    </div>
-    <div id="salary-list"></div>
-  </div>
-
-  <!-- 従業員ページ -->
-  <div class="page" id="page-employees">
     <div class="card">
-      <div class="card-title" id="emp-form-title">従業員を追加</div>
-      <div class="field">
-        <label>名前</label>
-        <input type="text" id="emp-name" placeholder="例: 山田 太郎">
-      </div>
-      <div class="field">
-        <label>時給（円）</label>
-        <input type="number" id="emp-wage" placeholder="例: 1050">
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-primary" style="flex:1" onclick="saveEmployee()" id="emp-save-btn">追加する</button>
-        <button class="btn btn-secondary btn-sm" id="emp-cancel-btn" style="display:none" onclick="cancelEdit()">キャンセル</button>
+      <div class="card-title">本日の状況</div>
+      <div class="status-grid" id="todayStatus">
+        <div class="status-item"><div class="status-label">出勤者</div><div class="status-value" id="todayCount">0人</div></div>
+        <div class="status-item"><div class="status-label">退勤済</div><div class="status-value" id="todayDone">0人</div></div>
       </div>
     </div>
-    <div class="section-label">従業員一覧</div>
-    <div id="employees-list"></div>
-  </div>
-</main>
+    <div class="card">
+      <div class="card-title">📝 勤務記録を手動追加</div>
+      <div class="form-group">
+        <label class="form-label">従業員</label>
+        <select class="form-select" id="addEmployee"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">日付</label>
+        <input type="date" class="form-input" id="addDate">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">出勤時刻</label>
+          <input type="time" class="form-input" id="addStart">
+        </div>
+        <div class="form-group">
+          <label class="form-label">退勤時刻</label>
+          <input type="time" class="form-input" id="addEnd">
+        </div>
+      </div>
 
-<!-- Modal for editing -->
-<div class="modal-overlay" id="edit-modal">
+      <!-- 休憩設定（手動追加用） -->
+      <div class="break-section" id="addBreakSection">
+        <div class="break-section-title">☕ 休憩設定（この日の分）</div>
+        <div class="info-box">デフォルト値を読み込んでいます。出勤時間に応じて自動で有効/無効が切り替わります。個別に変更することもできます。</div>
+
+        <div class="break-item" id="addBreak10Wrap">
+          <label class="break-toggle">
+            <div class="toggle-switch">
+              <input type="checkbox" id="addBreak10En" onchange="updateBreakUI('add')">
+              <span class="toggle-slider"></span>
+            </div>
+            10時休憩
+          </label>
+          <input type="number" id="addBreak10Min" min="0" max="60" value="15" oninput="updateBreakUI('add')">
+          <span>分</span>
+          <span class="break-minutes-display" id="addBreak10Badge">15分</span>
+        </div>
+        <div class="break-item" id="addBreakLunchWrap">
+          <label class="break-toggle">
+            <div class="toggle-switch">
+              <input type="checkbox" id="addBreakLunchEn" onchange="updateBreakUI('add')">
+              <span class="toggle-slider"></span>
+            </div>
+            昼休憩
+          </label>
+          <input type="number" id="addBreakLunchMin" min="0" max="120" value="60" oninput="updateBreakUI('add')">
+          <span>分</span>
+          <span class="break-minutes-display" id="addBreakLunchBadge">60分</span>
+        </div>
+        <div class="break-item" id="addBreak15Wrap">
+          <label class="break-toggle">
+            <div class="toggle-switch">
+              <input type="checkbox" id="addBreak15En" onchange="updateBreakUI('add')">
+              <span class="toggle-slider"></span>
+            </div>
+            15時休憩
+          </label>
+          <input type="number" id="addBreak15Min" min="0" max="60" value="15" oninput="updateBreakUI('add')">
+          <span>分</span>
+          <span class="break-minutes-display" id="addBreak15Badge">15分</span>
+        </div>
+
+        <div style="margin-top:10px;padding:8px 10px;background:#f0f7f0;border-radius:8px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;color:#2c5f2e;font-weight:700;">休憩合計</span>
+          <span style="font-size:15px;font-weight:700;color:#2c5f2e;" id="addBreakTotal">0分</span>
+        </div>
+      </div>
+
+      <button class="btn btn-add" onclick="addRecord()">＋ 記録を追加</button>
+    </div>
+  </div>
+
+  <!-- 記録タブ -->
+  <div class="section" id="section-records">
+    <div class="card">
+      <div class="card-title">勤務記録一覧</div>
+      <div class="filter-row" id="empFilter"></div>
+      <div class="month-nav">
+        <button class="month-nav-btn" onclick="changeMonth(-1)">‹</button>
+        <span class="month-title" id="recordsMonthTitle"></span>
+        <button class="month-nav-btn" onclick="changeMonth(1)">›</button>
+      </div>
+      <ul class="record-list" id="recordList"></ul>
+    </div>
+  </div>
+
+  <!-- 給与タブ -->
+  <div class="section" id="section-salary">
+    <div class="card">
+      <div class="month-nav">
+        <button class="month-nav-btn" onclick="changeSalaryMonth(-1)">‹</button>
+        <span class="month-title" id="salaryMonthTitle"></span>
+        <button class="month-nav-btn" onclick="changeSalaryMonth(1)">›</button>
+      </div>
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>従業員</th>
+            <th>勤務時間</th>
+            <th>休憩</th>
+            <th>実働</th>
+            <th>給与</th>
+          </tr>
+        </thead>
+        <tbody id="salaryTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 従業員タブ -->
+  <div class="section" id="section-employees">
+    <div class="card">
+      <div class="card-title">従業員を追加</div>
+      <div class="form-group">
+        <label class="form-label">名前</label>
+        <input type="text" class="form-input" id="empName" placeholder="例：山田 太郎">
+      </div>
+      <div class="form-group">
+        <label class="form-label">時給（円）</label>
+        <input type="number" class="form-input" id="empWage" placeholder="例：1050" min="0">
+      </div>
+      <button class="btn btn-primary btn-add" onclick="addEmployee()">＋ 追加する</button>
+    </div>
+    <div class="card">
+      <div class="card-title">従業員一覧</div>
+      <div id="empList"></div>
+    </div>
+  </div>
+
+  <!-- 休憩デフォルト設定タブ -->
+  <div class="section" id="section-breaks">
+    <div class="break-default-card">
+      <div class="break-default-title">☕ 休憩デフォルト設定</div>
+      <div class="info-box">
+        ここで設定した値が、記録追加時の初期値として使われます。<br>
+        記録を追加するときに個別に変更することも可能です。<br>
+        また、出勤時間に応じて自動で休憩の有効/無効が切り替わります。<br>
+        例）10時出勤 → 10時休憩は自動でOFF
+      </div>
+
+      <div class="break-default-row">
+        <div>
+          <div class="break-default-label">🕙 10時休憩</div>
+          <div class="break-default-sub">出勤が10:00以降の場合は自動でOFF</div>
+        </div>
+        <div class="break-default-input-wrap">
+          <input type="number" class="break-default-input" id="def10Min" min="0" max="60" value="15" oninput="saveDefaults()">
+          <span style="font-size:13px;color:var(--text-muted)">分</span>
+        </div>
+      </div>
+
+      <div class="break-default-row">
+        <div>
+          <div class="break-default-label">🍱 昼休憩</div>
+          <div class="break-default-sub">出勤が13:00以降の場合は自動でOFF</div>
+        </div>
+        <div class="break-default-input-wrap">
+          <input type="number" class="break-default-input" id="defLunchMin" min="0" max="120" value="60" oninput="saveDefaults()">
+          <span style="font-size:13px;color:var(--text-muted)">分</span>
+        </div>
+      </div>
+
+      <div class="break-default-row">
+        <div>
+          <div class="break-default-label">🕒 15時休憩</div>
+          <div class="break-default-sub">出勤が15:00以降の場合は自動でOFF</div>
+        </div>
+        <div class="break-default-input-wrap">
+          <input type="number" class="break-default-input" id="def15Min" min="0" max="60" value="15" oninput="saveDefaults()">
+          <span style="font-size:13px;color:var(--text-muted)">分</span>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;padding:12px;background:white;border-radius:8px;border:1px solid #f0d9a0;">
+        <div style="font-size:13px;color:#c17a00;font-weight:700;margin-bottom:6px;">デフォルト合計休憩時間</div>
+        <div style="font-size:22px;font-weight:700;color:#2c5f2e;" id="defTotal">90分</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">（出勤時間次第で変動します）</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">自動判定のルール</div>
+      <div style="font-size:13px;line-height:1.8;color:var(--text-muted);">
+        <div>🕙 <strong>10時休憩</strong>：出勤時刻が <strong>10:00以前</strong> の場合に有効</div>
+        <div>🍱 <strong>昼休憩</strong>：出勤時刻が <strong>13:00以前</strong> の場合に有効</div>
+        <div>🕒 <strong>15時休憩</strong>：出勤時刻が <strong>15:00以前</strong> の場合に有効</div>
+        <br>
+        <div style="color:#1a1a1a;">記録追加時に個別に変更することもできます。</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- 編集モーダル -->
+<div class="modal-overlay" id="editModal">
   <div class="modal">
-    <h3>記録を編集</h3>
-    <input type="hidden" id="edit-rec-id">
-    <div class="field">
-      <label>日付</label>
-      <input type="date" id="edit-date">
+    <div class="modal-title">記録を編集</div>
+    <input type="hidden" id="editId">
+    <div class="form-group">
+      <label class="form-label">日付</label>
+      <input type="date" class="form-input" id="editDate">
     </div>
-    <div style="display:flex;gap:8px;" class="field">
-      <div style="flex:1"><label>出勤</label><input type="time" id="edit-in"></div>
-      <div style="flex:1"><label>退勤</label><input type="time" id="edit-out"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">出勤</label>
+        <input type="time" class="form-input" id="editStart" oninput="autoSetEditBreaks()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">退勤</label>
+        <input type="time" class="form-input" id="editEnd">
+      </div>
     </div>
-    <div class="modal-btns">
+
+    <!-- 休憩設定（編集用） -->
+    <div class="break-section">
+      <div class="break-section-title">☕ 休憩設定</div>
+      <div class="break-item">
+        <label class="break-toggle">
+          <div class="toggle-switch">
+            <input type="checkbox" id="editBreak10En" onchange="updateBreakUI('edit')">
+            <span class="toggle-slider"></span>
+          </div>
+          10時休憩
+        </label>
+        <input type="number" id="editBreak10Min" min="0" max="60" oninput="updateBreakUI('edit')">
+        <span>分</span>
+        <span class="break-minutes-display" id="editBreak10Badge">0分</span>
+      </div>
+      <div class="break-item">
+        <label class="break-toggle">
+          <div class="toggle-switch">
+            <input type="checkbox" id="editBreakLunchEn" onchange="updateBreakUI('edit')">
+            <span class="toggle-slider"></span>
+          </div>
+          昼休憩
+        </label>
+        <input type="number" id="editBreakLunchMin" min="0" max="120" oninput="updateBreakUI('edit')">
+        <span>分</span>
+        <span class="break-minutes-display" id="editBreakLunchBadge">0分</span>
+      </div>
+      <div class="break-item">
+        <label class="break-toggle">
+          <div class="toggle-switch">
+            <input type="checkbox" id="editBreak15En" onchange="updateBreakUI('edit')">
+            <span class="toggle-slider"></span>
+          </div>
+          15時休憩
+        </label>
+        <input type="number" id="editBreak15Min" min="0" max="60" oninput="updateBreakUI('edit')">
+        <span>分</span>
+        <span class="break-minutes-display" id="editBreak15Badge">0分</span>
+      </div>
+      <div style="margin-top:10px;padding:8px 10px;background:#f0f7f0;border-radius:8px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:13px;color:#2c5f2e;font-weight:700;">休憩合計</span>
+        <span style="font-size:15px;font-weight:700;color:#2c5f2e;" id="editBreakTotal">0分</span>
+      </div>
+    </div>
+
+    <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
       <button class="btn btn-primary" onclick="saveEdit()">保存</button>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
-// ─── Data ────────────────────────────────────────────
-const COLORS = ['#4ade80','#22d3ee','#f59e0b','#a78bfa','#fb7185'];
+// ====== データ管理 ======
+let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+let records = JSON.parse(localStorage.getItem('records') || '[]');
+let breakDefaults = JSON.parse(localStorage.getItem('breakDefaults') || JSON.stringify({
+  break10: 15,
+  breakLunch: 60,
+  break15: 15
+}));
 
-function load(key) {
-  try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
+function saveData() {
+  localStorage.setItem('employees', JSON.stringify(employees));
+  localStorage.setItem('records', JSON.stringify(records));
 }
-function save(key, data) {
-  localStorage.setItem(key, JSON.stringify(data));
+function saveDefaults() {
+  breakDefaults.break10 = parseInt(document.getElementById('def10Min').value) || 0;
+  breakDefaults.breakLunch = parseInt(document.getElementById('defLunchMin').value) || 0;
+  breakDefaults.break15 = parseInt(document.getElementById('def15Min').value) || 0;
+  localStorage.setItem('breakDefaults', JSON.stringify(breakDefaults));
+  updateDefTotal();
+}
+function updateDefTotal() {
+  const t = breakDefaults.break10 + breakDefaults.breakLunch + breakDefaults.break15;
+  document.getElementById('defTotal').textContent = t + '分';
 }
 
-let employees = load('employees');
-let records = load('records');
+// ====== 休憩の自動判定 ======
+// 出勤時間をHH:MM形式で受け取り、各休憩が有効かを返す
+function autoBreakEnabled(startTime) {
+  if (!startTime) return { b10: true, lunch: true, b15: true };
+  const [h, m] = startTime.split(':').map(Number);
+  const mins = h * 60 + m;
+  return {
+    b10:   mins < 10 * 60,       // 10:00より前に出勤なら10時休憩あり
+    lunch: mins < 13 * 60,       // 13:00より前に出勤なら昼休憩あり
+    b15:   mins < 15 * 60        // 15:00より前に出勤なら15時休憩あり
+  };
+}
 
-// activeClockIns: {empId: isoString}
-let activeClockIns = JSON.parse(localStorage.getItem('activeClockIns') || '{}');
+// ====== 休憩UIの更新 ======
+function updateBreakUI(prefix) {
+  const en10 = document.getElementById(prefix + 'Break10En').checked;
+  const enL  = document.getElementById(prefix + 'BreakLunchEn').checked;
+  const en15 = document.getElementById(prefix + 'Break15En').checked;
+  const m10  = parseInt(document.getElementById(prefix + 'Break10Min').value) || 0;
+  const mL   = parseInt(document.getElementById(prefix + 'BreakLunchMin').value) || 0;
+  const m15  = parseInt(document.getElementById(prefix + 'Break15Min').value) || 0;
 
-// salary view month
-let salaryYear = new Date().getFullYear();
-let salaryMonth = new Date().getMonth(); // 0-indexed
+  document.getElementById(prefix + 'Break10Badge').textContent   = en10 ? m10 + '分' : 'OFF';
+  document.getElementById(prefix + 'BreakLunchBadge').textContent = enL  ? mL  + '分' : 'OFF';
+  document.getElementById(prefix + 'Break15Badge').textContent   = en15 ? m15 + '分' : 'OFF';
 
-let editingEmpId = null;
+  const total = (en10 ? m10 : 0) + (enL ? mL : 0) + (en15 ? m15 : 0);
+  document.getElementById(prefix + 'BreakTotal').textContent = total + '分';
 
-// ─── Clock ───────────────────────────────────────────
+  // 入力フィールドをdisabled
+  document.getElementById(prefix + 'Break10Min').disabled   = !en10;
+  document.getElementById(prefix + 'BreakLunchMin').disabled = !enL;
+  document.getElementById(prefix + 'Break15Min').disabled   = !en15;
+}
+
+// 出勤時間をもとにデフォルト値をセット
+function initBreakFields(prefix, startTime) {
+  const ab = autoBreakEnabled(startTime);
+  document.getElementById(prefix + 'Break10En').checked    = ab.b10;
+  document.getElementById(prefix + 'BreakLunchEn').checked = ab.lunch;
+  document.getElementById(prefix + 'Break15En').checked    = ab.b15;
+  document.getElementById(prefix + 'Break10Min').value    = breakDefaults.break10;
+  document.getElementById(prefix + 'BreakLunchMin').value = breakDefaults.breakLunch;
+  document.getElementById(prefix + 'Break15Min').value    = breakDefaults.break15;
+  updateBreakUI(prefix);
+}
+
+// 手動追加：出勤時刻が変わったら自動反映
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('addStart').addEventListener('change', function() {
+    const ab = autoBreakEnabled(this.value);
+    document.getElementById('addBreak10En').checked    = ab.b10;
+    document.getElementById('addBreakLunchEn').checked = ab.lunch;
+    document.getElementById('addBreak15En').checked    = ab.b15;
+    updateBreakUI('add');
+  });
+});
+
+// 編集モーダル：出勤時刻が変わったら自動反映
+function autoSetEditBreaks() {
+  const startTime = document.getElementById('editStart').value;
+  const ab = autoBreakEnabled(startTime);
+  document.getElementById('editBreak10En').checked    = ab.b10;
+  document.getElementById('editBreakLunchEn').checked = ab.lunch;
+  document.getElementById('editBreak15En').checked    = ab.b15;
+  updateBreakUI('edit');
+}
+
+// 記録から休憩合計を計算
+function calcBreakMins(record) {
+  let total = 0;
+  if (record.break10En  && record.break10Min)    total += record.break10Min;
+  if (record.breakLunchEn && record.breakLunchMin) total += record.breakLunchMin;
+  if (record.break15En  && record.break15Min)    total += record.break15Min;
+  return total;
+}
+
+// 勤務時間計算（実働時間 = 総時間 - 休憩）
+function calcHours(record) {
+  if (!record.startTime || !record.endTime) return { raw: 0, net: 0, break: 0 };
+  const [sh, sm] = record.startTime.split(':').map(Number);
+  const [eh, em] = record.endTime.split(':').map(Number);
+  const rawMins = (eh * 60 + em) - (sh * 60 + sm);
+  if (rawMins <= 0) return { raw: 0, net: 0, break: 0 };
+  const breakMins = calcBreakMins(record);
+  const netMins = Math.max(0, rawMins - breakMins);
+  return {
+    raw:   rawMins / 60,
+    net:   netMins / 60,
+    break: breakMins
+  };
+}
+
+function fmtHours(h) {
+  const hh = Math.floor(h);
+  const mm = Math.round((h - hh) * 60);
+  return hh + 'h' + (mm > 0 ? mm + 'm' : '');
+}
+
+// ====== 時計 ======
 function updateClock() {
   const now = new Date();
-  document.getElementById('clock-display').textContent =
-    now.toLocaleTimeString('ja-JP');
-  document.getElementById('date-display').textContent =
-    now.toLocaleDateString('ja-JP', {year:'numeric',month:'long',day:'numeric',weekday:'short'});
+  const t = now.toTimeString().slice(0, 8);
+  document.getElementById('headerClock').textContent = t;
+  document.getElementById('bigClock').textContent = t;
+  const days = ['日','月','火','水','木','金','土'];
+  document.getElementById('dateDisplay').textContent =
+    now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日（' + days[now.getDay()] + '）';
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-// ─── Navigation ──────────────────────────────────────
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  event.target.classList.add('active');
-  if (id === 'records') renderRecords();
-  if (id === 'salary') renderSalary();
-  if (id === 'employees') renderEmployees();
-  if (id === 'attendance') renderTodayStatus();
+// ====== タブ切り替え ======
+function switchTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'records') renderRecords();
+  if (tab === 'salary') renderSalary();
+  if (tab === 'employees') renderEmployees();
+  if (tab === 'punch') renderTodayStatus();
+  if (tab === 'breaks') {
+    document.getElementById('def10Min').value    = breakDefaults.break10;
+    document.getElementById('defLunchMin').value = breakDefaults.breakLunch;
+    document.getElementById('def15Min').value    = breakDefaults.break15;
+    updateDefTotal();
+  }
 }
 
-// ─── Toast ────────────────────────────────────────────
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+// ====== 従業員 ======
+function addEmployee() {
+  const name = document.getElementById('empName').value.trim();
+  const wage = parseInt(document.getElementById('empWage').value);
+  if (!name) return alert('名前を入力してください');
+  if (!wage || wage < 0) return alert('時給を入力してください');
+  employees.push({ id: Date.now(), name, wage });
+  saveData();
+  document.getElementById('empName').value = '';
+  document.getElementById('empWage').value = '';
+  renderEmployees();
+  updateEmpSelects();
 }
 
-// ─── Employees ───────────────────────────────────────
-function getColor(i) { return COLORS[i % COLORS.length]; }
-
-function renderEmployeeSelects() {
-  const selects = ['att-emp-select','rec-emp-select','filter-emp'];
-  selects.forEach(id => {
-    const sel = document.getElementById(id);
-    if (!sel) return;
-    const cur = sel.value;
-    const prefix = id === 'filter-emp' ? '<option value="">全員</option>' : '<option value="">-- 選択 --</option>';
-    sel.innerHTML = prefix + employees.map(e =>
-      `<option value="${e.id}">${e.name}</option>`).join('');
-    sel.value = cur;
-  });
+function deleteEmployee(id) {
+  if (!confirm('削除しますか？')) return;
+  employees = employees.filter(e => e.id !== id);
+  saveData();
+  renderEmployees();
+  updateEmpSelects();
 }
 
 function renderEmployees() {
-  const list = document.getElementById('employees-list');
-  if (!employees.length) { list.innerHTML = '<div class="empty">従業員がいません</div>'; return; }
-  list.innerHTML = employees.map((e, i) => `
+  const el = document.getElementById('empList');
+  if (!employees.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div>従業員が登録されていません</div>';
+    return;
+  }
+  el.innerHTML = employees.map(e => `
     <div class="emp-item">
-      <div class="emp-avatar" style="background:${getColor(i)}22;color:${getColor(i)}">${e.name[0]}</div>
       <div class="emp-info">
         <div class="emp-name">${e.name}</div>
-        <div class="emp-wage">¥${Number(e.wage).toLocaleString()} / 時</div>
+        <div class="emp-wage">時給 ¥${e.wage.toLocaleString()}</div>
       </div>
       <div class="emp-actions">
-        <button class="btn btn-secondary btn-sm" onclick="editEmployee('${e.id}')">編集</button>
-        <button class="btn btn-sm" style="background:rgba(248,113,113,0.15);color:#f87171" onclick="deleteEmployee('${e.id}')">削除</button>
+        <button class="btn-delete" onclick="deleteEmployee(${e.id})">削除</button>
       </div>
     </div>
   `).join('');
 }
 
-function saveEmployee() {
-  const name = document.getElementById('emp-name').value.trim();
-  const wage = parseInt(document.getElementById('emp-wage').value);
-  if (!name) { showToast('名前を入力してください'); return; }
-  if (!wage || wage < 1) { showToast('時給を入力してください'); return; }
-
-  if (editingEmpId) {
-    employees = employees.map(e => e.id === editingEmpId ? {...e, name, wage} : e);
-    showToast('従業員情報を更新しました');
-    cancelEdit();
-  } else {
-    employees.push({ id: Date.now().toString(), name, wage });
-    showToast(`${name} を追加しました`);
-  }
-  save('employees', employees);
-  document.getElementById('emp-name').value = '';
-  document.getElementById('emp-wage').value = '';
-  renderEmployees();
-  renderEmployeeSelects();
+function updateEmpSelects() {
+  const opts = employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+  document.getElementById('punchEmployee').innerHTML = '<option value="">-- 従業員を選択 --</option>' + opts;
+  document.getElementById('addEmployee').innerHTML = opts;
 }
 
-function editEmployee(id) {
-  const e = employees.find(x => x.id === id);
-  if (!e) return;
-  editingEmpId = id;
-  document.getElementById('emp-name').value = e.name;
-  document.getElementById('emp-wage').value = e.wage;
-  document.getElementById('emp-form-title').textContent = '従業員を編集';
-  document.getElementById('emp-save-btn').textContent = '保存する';
-  document.getElementById('emp-cancel-btn').style.display = 'inline-block';
-  document.getElementById('page-employees').scrollTop = 0;
-}
-
-function cancelEdit() {
-  editingEmpId = null;
-  document.getElementById('emp-name').value = '';
-  document.getElementById('emp-wage').value = '';
-  document.getElementById('emp-form-title').textContent = '従業員を追加';
-  document.getElementById('emp-save-btn').textContent = '追加する';
-  document.getElementById('emp-cancel-btn').style.display = 'none';
-}
-
-function deleteEmployee(id) {
-  const e = employees.find(x => x.id === id);
-  if (!confirm(`${e.name} を削除しますか？`)) return;
-  employees = employees.filter(x => x.id !== id);
-  save('employees', employees);
-  renderEmployees();
-  renderEmployeeSelects();
-  showToast('削除しました');
-}
-
-// ─── Attendance ───────────────────────────────────────
-function clockIn() {
-  const id = document.getElementById('att-emp-select').value;
-  if (!id) { showToast('従業員を選択してください'); return; }
-  if (activeClockIns[id]) { showToast('すでに出勤中です'); return; }
-  activeClockIns[id] = new Date().toISOString();
-  localStorage.setItem('activeClockIns', JSON.stringify(activeClockIns));
-  const e = employees.find(x => x.id === id);
-  showToast(`${e.name} 出勤しました 🟢`);
+// ====== 打刻 ======
+function punchIn() {
+  const empId = parseInt(document.getElementById('punchEmployee').value);
+  if (!empId) return alert('従業員を選択してください');
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10);
+  const time = now.toTimeString().slice(0, 5);
+  const ab = autoBreakEnabled(time);
+  records.push({
+    id: Date.now(),
+    employeeId: empId,
+    date,
+    startTime: time,
+    endTime: '',
+    break10En:    ab.b10,
+    break10Min:   breakDefaults.break10,
+    breakLunchEn: ab.lunch,
+    breakLunchMin: breakDefaults.breakLunch,
+    break15En:    ab.b15,
+    break15Min:   breakDefaults.break15
+  });
+  saveData();
   renderTodayStatus();
+  alert('出勤を記録しました（' + time + '）');
 }
 
-function clockOut() {
-  const id = document.getElementById('att-emp-select').value;
-  if (!id) { showToast('従業員を選択してください'); return; }
-  if (!activeClockIns[id]) { showToast('出勤記録がありません'); return; }
-  const inTime = new Date(activeClockIns[id]);
-  const outTime = new Date();
-  const rec = {
-    id: Date.now().toString(),
-    empId: id,
-    date: inTime.toISOString().slice(0,10),
-    in: inTime.toTimeString().slice(0,5),
-    out: outTime.toTimeString().slice(0,5),
-  };
-  records.push(rec);
-  save('records', records);
-  delete activeClockIns[id];
-  localStorage.setItem('activeClockIns', JSON.stringify(activeClockIns));
-  const e = employees.find(x => x.id === id);
-  const hours = calcHours(rec.in, rec.out).toFixed(1);
-  showToast(`${e.name} 退勤 ${hours}h 🔴`);
+function punchOut() {
+  const empId = parseInt(document.getElementById('punchEmployee').value);
+  if (!empId) return alert('従業員を選択してください');
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10);
+  const time = now.toTimeString().slice(0, 5);
+  const rec = records.filter(r => r.employeeId === empId && r.date === date && !r.endTime).pop();
+  if (!rec) return alert('出勤記録が見つかりません');
+  rec.endTime = time;
+  saveData();
   renderTodayStatus();
+  const h = calcHours(rec);
+  alert('退勤を記録しました（' + time + '）\n実働: ' + fmtHours(h.net) + '（休憩' + h.break + '分除く）');
 }
 
 function renderTodayStatus() {
-  const today = new Date().toISOString().slice(0,10);
-  const div = document.getElementById('today-status');
-  if (!employees.length) { div.innerHTML = '<div class="empty">従業員を先に追加してください</div>'; return; }
-  div.innerHTML = employees.map((e, i) => {
-    const isIn = !!activeClockIns[e.id];
-    const todayRecs = records.filter(r => r.empId === e.id && r.date === today);
-    const times = todayRecs.map(r => `${r.in}〜${r.out}`).join(', ');
-    return `
-      <div class="att-row">
-        <div class="status-dot ${isIn ? 'in' : (todayRecs.length ? 'out' : '')}"></div>
-        <div class="emp-avatar" style="width:28px;height:28px;font-size:12px;background:${getColor(i)}22;color:${getColor(i)}">${e.name[0]}</div>
-        <div class="att-name">${e.name}</div>
-        <div class="att-time">${isIn ? '出勤中 ' + activeClockIns[e.id].slice(11,16) : (times || '-')}</div>
-        ${isIn ? `<span class="badge badge-green">IN</span>` : (todayRecs.length ? `<span class="badge badge-blue">${calcDayHours(e.id, today).toFixed(1)}h</span>` : '')}
-      </div>
-    `;
-  }).join('');
+  const today = new Date().toISOString().slice(0, 10);
+  const todayRecs = records.filter(r => r.date === today);
+  const working = todayRecs.filter(r => !r.endTime).length;
+  const done    = todayRecs.filter(r => r.endTime).length;
+  document.getElementById('todayCount').textContent = working + '人';
+  document.getElementById('todayDone').textContent  = done + '人';
 }
 
-function calcDayHours(empId, date) {
-  return records.filter(r => r.empId === empId && r.date === date)
-    .reduce((s, r) => s + calcHours(r.in, r.out), 0);
-}
-
-// ─── Records ──────────────────────────────────────────
-function calcHours(inTime, outTime) {
-  const [ih, im] = inTime.split(':').map(Number);
-  const [oh, om] = outTime.split(':').map(Number);
-  let mins = (oh * 60 + om) - (ih * 60 + im);
-  if (mins < 0) mins += 24 * 60;
-  return mins / 60;
-}
+// ====== 記録追加 ======
+let currentMonth = new Date().toISOString().slice(0, 7);
 
 function addRecord() {
-  const empId = document.getElementById('rec-emp-select').value;
-  const date = document.getElementById('rec-date').value;
-  const inT = document.getElementById('rec-in').value;
-  const outT = document.getElementById('rec-out').value;
-  if (!empId || !date || !inT || !outT) { showToast('全ての項目を入力してください'); return; }
-  records.push({ id: Date.now().toString(), empId, date, in: inT, out: outT });
-  save('records', records);
-  document.getElementById('rec-date').value = '';
-  document.getElementById('rec-in').value = '';
-  document.getElementById('rec-out').value = '';
-  showToast('記録を追加しました');
+  const empId = parseInt(document.getElementById('addEmployee').value);
+  const date  = document.getElementById('addDate').value;
+  const start = document.getElementById('addStart').value;
+  const end   = document.getElementById('addEnd').value;
+  if (!empId || !date || !start) return alert('従業員・日付・出勤時刻を入力してください');
+
+  const b10En  = document.getElementById('addBreak10En').checked;
+  const bLEn   = document.getElementById('addBreakLunchEn').checked;
+  const b15En  = document.getElementById('addBreak15En').checked;
+
+  records.push({
+    id: Date.now(), employeeId: empId, date, startTime: start, endTime: end,
+    break10En:    b10En,
+    break10Min:   parseInt(document.getElementById('addBreak10Min').value) || 0,
+    breakLunchEn: bLEn,
+    breakLunchMin: parseInt(document.getElementById('addBreakLunchMin').value) || 0,
+    break15En:    b15En,
+    break15Min:   parseInt(document.getElementById('addBreak15Min').value) || 0
+  });
+  saveData();
+  document.getElementById('addDate').value = '';
+  document.getElementById('addStart').value = '';
+  document.getElementById('addEnd').value = '';
+  // デフォルトに戻す
+  initBreakFields('add', '');
+  alert('記録を追加しました');
+}
+
+// ====== 記録一覧 ======
+let filterEmpId = null;
+
+function changeMonth(delta) {
+  const [y, m] = currentMonth.split('-').map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  currentMonth = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
   renderRecords();
 }
 
 function renderRecords() {
-  const filterEmp = document.getElementById('filter-emp').value;
-  const filterMonth = document.getElementById('filter-month').value;
-  let filtered = [...records];
-  if (filterEmp) filtered = filtered.filter(r => r.empId === filterEmp);
-  if (filterMonth) filtered = filtered.filter(r => r.date.startsWith(filterMonth));
-  filtered.sort((a,b) => b.date.localeCompare(a.date));
-  const list = document.getElementById('records-list');
-  if (!filtered.length) { list.innerHTML = '<div class="empty">記録がありません</div>'; return; }
-  list.innerHTML = filtered.map(r => {
-    const e = employees.find(x => x.id === r.empId);
-    const h = calcHours(r.in, r.out);
-    const empIdx = employees.indexOf(e);
+  document.getElementById('recordsMonthTitle').textContent =
+    currentMonth.replace('-', '年') + '月';
+
+  // フィルターボタン
+  const fr = document.getElementById('empFilter');
+  fr.innerHTML = `<button class="filter-btn ${filterEmpId === null ? 'active' : ''}" onclick="setFilter(null)">全員</button>` +
+    employees.map(e => `<button class="filter-btn ${filterEmpId === e.id ? 'active' : ''}" onclick="setFilter(${e.id})">${e.name}</button>`).join('');
+
+  let recs = records.filter(r => r.date.startsWith(currentMonth));
+  if (filterEmpId !== null) recs = recs.filter(r => r.employeeId === filterEmpId);
+  recs = recs.sort((a, b) => b.date.localeCompare(a.date));
+
+  const list = document.getElementById('recordList');
+  if (!recs.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>この月の記録はありません</div>';
+    return;
+  }
+  list.innerHTML = recs.map(r => {
+    const emp = employees.find(e => e.id === r.employeeId);
+    const h = calcHours(r);
+    const pay = emp ? Math.round(h.net * emp.wage) : 0;
+    const breakLabel = h.break > 0 ? `<span class="record-break">休憩${h.break}分</span>` : '';
+    const netLabel = r.endTime ? `<span class="record-hours">${fmtHours(h.net)}</span>` : '<span class="record-hours" style="color:#e67e22">勤務中</span>';
     return `
-      <div class="rec-item">
-        <div class="rec-date">${r.date.slice(5)}</div>
-        <div class="emp-avatar" style="width:24px;height:24px;font-size:11px;flex-shrink:0;background:${getColor(empIdx)}22;color:${getColor(empIdx)}">${e ? e.name[0] : '?'}</div>
-        <div class="rec-name">${e ? e.name : '不明'}</div>
-        <div class="rec-hours">${r.in}〜${r.out}<br><span style="color:var(--muted)">${h.toFixed(1)}h</span></div>
-        <button class="rec-del" onclick="openEditModal('${r.id}')">✏️</button>
-        <button class="rec-del" onclick="deleteRecord('${r.id}')">🗑</button>
-      </div>
+      <li class="record-item">
+        <div class="record-header">
+          <span class="record-name">${emp ? emp.name : '不明'}</span>
+          <span class="record-date">${r.date}</span>
+        </div>
+        <div class="record-times">
+          <span class="record-time">🟢 ${r.startTime || '--'}</span>
+          <span class="record-time">🔴 ${r.endTime || '--'}</span>
+          ${breakLabel}
+          ${netLabel}
+        </div>
+        ${r.endTime ? `<div class="record-pay">¥${pay.toLocaleString()}（時給¥${emp ? emp.wage : 0} × ${fmtHours(h.net)}）</div>` : ''}
+        <div class="record-actions">
+          <button class="btn-edit" onclick="openEdit(${r.id})">編集</button>
+          <button class="btn-delete" onclick="deleteRecord(${r.id})">削除</button>
+        </div>
+      </li>
     `;
   }).join('');
 }
 
-function deleteRecord(id) {
-  if (!confirm('この記録を削除しますか？')) return;
-  records = records.filter(r => r.id !== id);
-  save('records', records);
+function setFilter(id) {
+  filterEmpId = id;
   renderRecords();
-  showToast('削除しました');
 }
 
-function openEditModal(id) {
-  const r = records.find(x => x.id === id);
-  if (!r) return;
-  document.getElementById('edit-rec-id').value = id;
-  document.getElementById('edit-date').value = r.date;
-  document.getElementById('edit-in').value = r.in;
-  document.getElementById('edit-out').value = r.out;
-  document.getElementById('edit-modal').classList.add('open');
+function deleteRecord(id) {
+  if (!confirm('削除しますか？')) return;
+  records = records.filter(r => r.id !== id);
+  saveData();
+  renderRecords();
 }
-function closeModal() { document.getElementById('edit-modal').classList.remove('open'); }
+
+// ====== 編集 ======
+function openEdit(id) {
+  const r = records.find(r => r.id === id);
+  if (!r) return;
+  document.getElementById('editId').value    = id;
+  document.getElementById('editDate').value  = r.date;
+  document.getElementById('editStart').value = r.startTime;
+  document.getElementById('editEnd').value   = r.endTime;
+
+  document.getElementById('editBreak10En').checked    = !!r.break10En;
+  document.getElementById('editBreak10Min').value    = r.break10Min || breakDefaults.break10;
+  document.getElementById('editBreakLunchEn').checked = !!r.breakLunchEn;
+  document.getElementById('editBreakLunchMin').value = r.breakLunchMin || breakDefaults.breakLunch;
+  document.getElementById('editBreak15En').checked    = !!r.break15En;
+  document.getElementById('editBreak15Min').value    = r.break15Min || breakDefaults.break15;
+  updateBreakUI('edit');
+
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('open');
+}
+
 function saveEdit() {
-  const id = document.getElementById('edit-rec-id').value;
-  records = records.map(r => r.id === id ? {
-    ...r,
-    date: document.getElementById('edit-date').value,
-    in: document.getElementById('edit-in').value,
-    out: document.getElementById('edit-out').value,
-  } : r);
-  save('records', records);
+  const id = parseInt(document.getElementById('editId').value);
+  const r  = records.find(r => r.id === id);
+  if (!r) return;
+  r.date      = document.getElementById('editDate').value;
+  r.startTime = document.getElementById('editStart').value;
+  r.endTime   = document.getElementById('editEnd').value;
+  r.break10En    = document.getElementById('editBreak10En').checked;
+  r.break10Min   = parseInt(document.getElementById('editBreak10Min').value) || 0;
+  r.breakLunchEn = document.getElementById('editBreakLunchEn').checked;
+  r.breakLunchMin = parseInt(document.getElementById('editBreakLunchMin').value) || 0;
+  r.break15En    = document.getElementById('editBreak15En').checked;
+  r.break15Min   = parseInt(document.getElementById('editBreak15Min').value) || 0;
+  saveData();
   closeModal();
   renderRecords();
-  showToast('更新しました');
 }
 
-// ─── Salary ───────────────────────────────────────────
-function changeMonth(delta) {
-  salaryMonth += delta;
-  if (salaryMonth > 11) { salaryMonth = 0; salaryYear++; }
-  if (salaryMonth < 0) { salaryMonth = 11; salaryYear--; }
+// ====== 給与集計 ======
+let salaryMonth = new Date().toISOString().slice(0, 7);
+
+function changeSalaryMonth(delta) {
+  const [y, m] = salaryMonth.split('-').map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  salaryMonth = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
   renderSalary();
 }
 
 function renderSalary() {
-  const label = `${salaryYear}年${salaryMonth+1}月`;
-  document.getElementById('salary-month-label').textContent = label;
-  const prefix = `${salaryYear}-${String(salaryMonth+1).padStart(2,'0')}`;
-  const list = document.getElementById('salary-list');
-  if (!employees.length) { list.innerHTML = '<div class="empty">従業員がいません</div>'; return; }
-  let html = '';
-  let grandTotal = 0;
-  employees.forEach((e, i) => {
-    const recs = records.filter(r => r.empId === e.id && r.date.startsWith(prefix));
-    const totalH = recs.reduce((s, r) => s + calcHours(r.in, r.out), 0);
-    const pay = Math.round(totalH * e.wage);
-    grandTotal += pay;
-    html += `
-      <div class="salary-card">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <div class="emp-avatar" style="width:30px;height:30px;font-size:13px;background:${getColor(i)}22;color:${getColor(i)}">${e.name[0]}</div>
-          <div class="salary-name">${e.name}</div>
-        </div>
-        <div class="salary-row"><span>時給</span><span>¥${Number(e.wage).toLocaleString()}</span></div>
-        <div class="salary-row"><span>勤務回数</span><span>${recs.length}回</span></div>
-        <div class="salary-row"><span>合計勤務時間</span><span>${totalH.toFixed(1)}時間</span></div>
-        <div class="salary-total"><span>支給額</span><span>¥${pay.toLocaleString()}</span></div>
-      </div>
-    `;
+  document.getElementById('salaryMonthTitle').textContent =
+    salaryMonth.replace('-', '年') + '月';
+
+  const recs = records.filter(r => r.date.startsWith(salaryMonth) && r.endTime);
+  const tbody = document.getElementById('salaryTable');
+
+  if (!employees.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;padding:20px;">従業員が登録されていません</td></tr>';
+    return;
+  }
+
+  let rows = '';
+  let grandNet = 0, grandBreak = 0, grandPay = 0;
+
+  employees.forEach(emp => {
+    const empRecs = recs.filter(r => r.employeeId === emp.id);
+    if (!empRecs.length) return;
+    let totalRaw = 0, totalNet = 0, totalBreak = 0;
+    empRecs.forEach(r => {
+      const h = calcHours(r);
+      totalRaw  += h.raw;
+      totalNet  += h.net;
+      totalBreak += h.break;
+    });
+    const pay = Math.round(totalNet * emp.wage);
+    grandNet   += totalNet;
+    grandBreak += totalBreak;
+    grandPay   += pay;
+    rows += `<tr>
+      <td><strong>${emp.name}</strong></td>
+      <td>${fmtHours(totalRaw)}</td>
+      <td style="color:#c17a00;">${totalBreak}分</td>
+      <td style="color:#2c5f2e;font-weight:700;">${fmtHours(totalNet)}</td>
+      <td><strong>¥${pay.toLocaleString()}</strong></td>
+    </tr>`;
   });
-  html += `
-    <div class="card" style="text-align:center">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">合計支給額</div>
-      <div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:700;color:var(--accent)">¥${grandTotal.toLocaleString()}</div>
-    </div>
-  `;
-  list.innerHTML = html;
+
+  if (!rows) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;padding:20px;">この月の記録がありません</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows + `
+    <tr class="total-row">
+      <td>合計</td>
+      <td>-</td>
+      <td>${grandBreak}分</td>
+      <td>${fmtHours(grandNet)}</td>
+      <td>¥${grandPay.toLocaleString()}</td>
+    </tr>`;
 }
 
-// ─── Init ─────────────────────────────────────────────
-function init() {
-  // Set default date for records
-  document.getElementById('rec-date').value = new Date().toISOString().slice(0,10);
-  // Set default filter month
-  document.getElementById('filter-month').value = new Date().toISOString().slice(0,7);
-  renderEmployeeSelects();
+// ====== 初期化 ======
+window.addEventListener('DOMContentLoaded', () => {
+  updateEmpSelects();
+  renderEmployees();
   renderTodayStatus();
-  renderSalary();
-}
+  updateDefTotal();
 
-init();
+  // 手動追加フォームの初期値
+  document.getElementById('addDate').value = new Date().toISOString().slice(0, 10);
+  initBreakFields('add', '');
+});
 </script>
 </body>
 </html>
