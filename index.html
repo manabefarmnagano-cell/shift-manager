@@ -699,6 +699,24 @@
       <div class="card-title">従業員一覧</div>
       <div id="empList"></div>
     </div>
+
+    <!-- エクスポート・インポート -->
+    <div class="card">
+      <div class="card-title">📤 データのエクスポート・インポート</div>
+      <div class="info-box">
+        スマホ→PCへデータを移すときに使います。<br>
+        ① スマホで「エクスポート」→テキストをコピー<br>
+        ② LINEやメールでPCに送る<br>
+        ③ PCで「インポート」に貼り付けて読み込む<br>
+        ④ PCから印刷する
+      </div>
+      <button class="btn btn-primary" style="margin-bottom:10px;width:100%;padding:12px;" onclick="exportData()">📤 データをエクスポート（コピー）</button>
+      <div class="form-group">
+        <label class="form-label">インポート用テキストを貼り付け</label>
+        <textarea id="importText" class="form-input" rows="4" placeholder="エクスポートしたテキストをここに貼り付けてください"></textarea>
+      </div>
+      <button class="btn btn-secondary" style="width:100%;padding:12px;" onclick="importData()">📥 データをインポート</button>
+    </div>
   </div>
 
   <!-- 休憩デフォルト設定タブ -->
@@ -1384,6 +1402,55 @@ function printReport() {
   document.getElementById('printArea').style.display = 'block';
   window.print();
   document.getElementById('printArea').style.display = 'none';
+}
+
+// ====== エクスポート・インポート ======
+function exportData() {
+  const data = {
+    employees: employees,
+    records: records,
+    breakDefaults: breakDefaults,
+    exportedAt: new Date().toISOString()
+  };
+  const json = JSON.stringify(data);
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(json).then(() => {
+      alert('データをコピーしました！\nLINEやメールでPCに送ってください。');
+    });
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = json;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('データをコピーしました！\nLINEやメールでPCに送ってください。');
+  }
+}
+
+function importData() {
+  const text = document.getElementById('importText').value.trim();
+  if (!text) return alert('テキストを貼り付けてください');
+  try {
+    const data = JSON.parse(text);
+    if (!data.employees || !data.records) throw new Error();
+    if (!confirm('現在のデータを上書きしてインポートしますか？')) return;
+    employees = data.employees;
+    records = data.records;
+    if (data.breakDefaults) {
+      breakDefaults = data.breakDefaults;
+      localStorage.setItem('breakDefaults', JSON.stringify(breakDefaults));
+    }
+    saveData();
+    updateEmpSelects();
+    updatePrintEmpSelect();
+    renderEmployees();
+    renderTodayStatus();
+    document.getElementById('importText').value = '';
+    alert('インポートが完了しました！');
+  } catch(e) {
+    alert('データの形式が正しくありません。\nもう一度エクスポートしてコピーし直してください。');
+  }
 }
 
 // ====== 初期化 ======
